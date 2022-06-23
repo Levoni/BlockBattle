@@ -1,7 +1,23 @@
+//-----------------------------------------------------------------------------
+// Names:             Alex Bisbach, Matthew Burgess, Levon Swenson
+// Course:            Mobile Applications
+// Assignment:        Final Project
+// File description:  OptionsScreen.js represents the main options screen
+//                    from which a user can navigate to either sound options
+//                    or user options.
+//-----------------------------------------------------------------------------
+
 import React from 'react';
 import { StyleSheet, TouchableOpacity, Text, View, Button } from 'react-native';
 import SoundManager from './SoundManager';
 
+//-----------------------------------------------------------------------------
+// state: 
+//         - none
+// props:
+//         - navigation - The navigation props passed by default by
+//                        react-navigation
+//-----------------------------------------------------------------------------
 export default class OptionsScreen extends React.Component {
    static navigationOptions = ({ navigation }) => {
       return {
@@ -10,45 +26,40 @@ export default class OptionsScreen extends React.Component {
             textAlign: 'center',
             flex: 1
          },
-         // headerLeft: (
-         //    <View style={{ flex: 1 }}></View>
-         // ),
          headerRight: (
             <View style={{ flex: 1 }}></View>
          )
       }
    }
 
+   //--------------------------------------------------------------------------
+   // Navigates to the SoundScreen.
+   //--------------------------------------------------------------------------
    toSound = () => {
       SoundManager.PlayButtonPress();
       this.props.navigation.navigate('SoundScreen');
    }
 
-   toColor = () => {
-      SoundManager.PlayButtonPress();
-      this.props.navigation.navigate('BackgroundColorScreen')
-   }
-
+   //--------------------------------------------------------------------------
+   // Navigates to the UserSettingsScreen.
+   //--------------------------------------------------------------------------
    toUserSettings = () => {
       SoundManager.PlayButtonPress();
       this.props.navigation.navigate('UserSettingsScreen')
    }
 
+   //--------------------------------------------------------------------------
+   // Renders the OptionsScreen.
+   //--------------------------------------------------------------------------
    render() {
       return (
          <View style={styles.container}>
-            {/* <Button title="Sound" onPress={() => this.props.navigation.navigate('SoundScreen')} /> */}
             <TouchableOpacity style={styles.Button} onPress={() => this.toSound()}>
                <Text>Sound</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.Button} onPress={() => this.toColor()}>
-               <Text>Color</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.Button} onPress={() => this.toUserSettings()}>
                <Text>User</Text>
             </TouchableOpacity>
-            {/* <Button title="Color" onPress={() => this.props.navigation.navigate('BackgroundColorScreen')} />
-            <Button title="User" onPress={() => this.props.navigation.navigate('UserSettingsScreen')} /> */}
          </View>
       )
    }

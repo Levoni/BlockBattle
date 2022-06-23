@@ -1,3 +1,25 @@
+//-------------------------------------------------------------------------
+// This component is responsible for rendering the game screen.
+// Props: players (Players[]) - the list of the players in the current game
+//        selectedPiece (Piece) - the piece that is readu to be placed
+//        selectedPlayer (Player) - the player whos turn it is
+//        selectPlayer (function) - used to select a player from the list
+//             of players
+//        selectPiece (function) - used to select a piece from the current
+//             player
+//        removePiece (function) - removes a piece from the current player,
+//             and from the player in the list of players
+//        flipVertical (function) - flips the selected piece vertically
+//        flipHorizontal (function) - flips the selected piece horizontally
+//        rotateCW (function) - rotates the selected piece clockwise
+//        rotateCCW (function) - rotates the selected piece counter clockwise
+//        updateSurrender (function) - updates the surrender attribute of the
+//             player in the player list
+//        reloadPlayers (function) - regenerates all of the players' lists
+//             of pieces and surrender attributes
+//        resetPlayers (function) - reset the players to the default list
+//             of empty players
+//-------------------------------------------------------------------------
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View, Text, StatusBar, Image, Animated, Easing } from 'react-native';
 import GameBoard from './GameBoard'
@@ -8,24 +30,59 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux';
 import {
    selectPlayer, selectPiece, removePiece,
-   flipVertical, flipHorizontal, rotateCW, rotateCCW
+   flipVertical, flipHorizontal, rotateCW, rotateCCW,
+   updateSurrender, reloadPlayers, resetPlayers
 } from './Actions';
 import images from './images'
-import BoardTile from './BoardTile';
-import Piece from './Piece';
 import SoundManager from './SoundManager';
+import { Octicons } from '@expo/vector-icons'
 
 class GameScreen extends React.Component {
+   // The state holds whether the side menu is open, and whether the board 
+   //    needs to be reset
+   // The playerTurn tracks the current players turn
+   // The numRemainingPlayers is how many players haven't surrendered yet
+   // reload first player is used to wait for the list of players to update
+   //       before reloading the first player
    constructor(props) {
       super(props)
       this.playerTurn = 0
-      this.toggle = this.toggle.bind(this);
+      this.numRemainingPlayers = 4
+      this.reloadFirstPlayer = false
+      this.toggleSideMenu = this.toggleSideMenu.bind(this);
       this.initRotation()
       this.state = {
          isOpen: false,
+         reloadBoard: false
+      }
+      this.props.navigation.setParams({ sideMenu: this.toggleSideMenu })
+   }
+
+   // Displays a header with a menu icon used to open the side menu
+   static navigationOptions = ({ navigation }) => {
+      return {
+         title: 'Block Battle',
+         headerStyle: { height: 40, paddingTop: 0, marginTop: -20 },
+         headerTitleStyle: {
+            textAlign: 'center',
+            flex: 1,
+         },
+         headerLeft: (
+            <TouchableOpacity onPress={navigation.getParam('sideMenu')} style={{ paddingLeft: 10 }}>
+               <Octicons
+                  name={'three-bars'}
+                  size={40}
+               >
+               </Octicons>
+            </TouchableOpacity>
+         ),
+         headerRight: (
+            <View style={{ flex: 1 }}></View>
+         )
       }
    }
 
+   // initializes the rotation of a piece
    initRotation = () => {
       this.flippedV = true
       this.flippedH = true
@@ -35,51 +92,93 @@ class GameScreen extends React.Component {
       this.thetaZ = new Animated.Value(0)
    }
 
+   // selects the given piece
    selectPiece = (item) => {
       this.props.selectPiece(item)
       this.initRotation()
    }
 
+   // called after the piece is placed in GameBoard.js
+   // It removes the piece from the playerm annd changes turn
    placePiece = () => {
-      this.playerTurn = (this.playerTurn + 1) % 4
       this.props.removePiece(this.props.selectedPlayer.name, this.props.selectedPiece.id)
-      this.props.selectPlayer(this.props.players[this.playerTurn])
-      this.selectPiece(this.props.players[this.playerTurn].pieces[0])
+      if (this.props.selectedPlayer.pieces.length <= 1)
+         this.updateSurrender()
+      else {
+         this.nextTurn()
+         if (this.numRemainingPlayers === 1) {
+            this.selectPiece(this.props.players[this.playerTurn].pieces[1])
+         }
+         else {
+            this.props.selectPlayer(this.props.players[this.playerTurn])
+            this.selectPiece(this.props.players[this.playerTurn].pieces[0])
+         }
+      }
    }
 
+   // Selects the first player and piece at startup
    componentDidMount = () => {
       this.props.selectPlayer(this.props.players[0])
       this.props.selectPiece(this.props.players[0].pieces[0])
+      this.refreshBoard = this.refreshBoard.bind(this)
       //this._animate()
    }
 
-   toggle() {
+   // Sets the flag to clear the board
+   refreshBoard = () => {
+      this.setState({ reloadBoard: !this.state.reloadBoard })
+   }
+
+   // toggles the state of the side menu either open or closed
+   toggleSideMenu() {
       this.setState({
          isOpen: !this.state.isOpen,
       });
    }
 
+   // sets the side menu to the passed state
    updateMenuState(isOpen) {
       this.setState({ isOpen });
    }
 
+   // Stops sound, clears players, and navigates to the main menu
    quitGame = () => {
       SoundManager.PlayButtonPress();
       SoundManager.StopBackgroundMusic();
+      this.props.resetPlayers();
       this.props.navigation.navigate('MainMenuNav');
    }
 
-   restartGame = () => {
-      SoundManager.PlayButtonPress();
-      this.toggle()
+   // Reloads the first player if needed, since the props may have been updated
+   componentDidUpdate() {
+      if (this.reloadFirstPlayer) {
+         this.props.selectPlayer(this.props.players[0])
+         this.props.selectPiece(this.props.players[0].pieces[0])
+         this.playerTurn = 0
+         this.reloadFirstPlayer = false
+      }
    }
 
+   // Reloads the selected players, sets flags to clear the board and update
+   //       the selected player, and closes the side menu
+   restartGame = () => {
+      SoundManager.PlayButtonPress();
+      this.props.reloadPlayers()
+      this.reloadFirstPlayer = true
+      this.numRemainingPlayers = 4
+      this.refreshBoard()
+      this.toggleSideMenu()
+   }
+
+   // Stops sounds, resets players, and navigates to the choosing first player screen
    newGame = () => {
       SoundManager.PlayButtonPress();
       SoundManager.StopBackgroundMusic();
+      this.props.resetPlayers()
       this.props.navigation.navigate('SetupP1');
    }
 
+   // Handles the click of the counter clockwise rotation button
    onCounterclockwisePress = () => {
       SoundManager.PlayButtonPress();
       if ((this.flippedH && this.flippedV) ||
@@ -91,6 +190,7 @@ class GameScreen extends React.Component {
       this.props.rotateCCW()
    }
 
+   // rotates the piece image counter clockwise
    rotateCounterClockwise = () => {
       this.rotation = (this.rotation - 1) % 5
       Animated.timing(this.thetaZ, {
@@ -101,6 +201,8 @@ class GameScreen extends React.Component {
       }).start(this.updateRotationCounterClockwise)
    }
 
+   // updates the rotation from 360 to 0 to enable 
+   //    continual rotation in the same direction
    updateRotationCounterClockwise = () => {
       if (this.rotation === -4) {
          this.thetaZ.setValue(0)
@@ -108,6 +210,7 @@ class GameScreen extends React.Component {
       }
    }
 
+   // Handles the click of the clockwise rotation button
    onClockwisePress = () => {
       SoundManager.PlayButtonPress();
       if ((this.flippedH && this.flippedV) ||
@@ -119,6 +222,7 @@ class GameScreen extends React.Component {
       this.props.rotateCW()
    }
 
+   // Rotate the piece image clockwise
    rotateClockwise = () => {
       this.rotation = (this.rotation + 1) % 5
       Animated.timing(this.thetaZ, {
@@ -129,6 +233,8 @@ class GameScreen extends React.Component {
       }).start(this.updateRotationClockwise)
    }
 
+   // updates the rotation from 360 to 0 to enable 
+   //    continual rotation in the same direction
    updateRotationClockwise = () => {
       if (this.rotation === 4) {
          this.thetaZ.setValue(0)
@@ -136,6 +242,7 @@ class GameScreen extends React.Component {
       }
    }
 
+   // Handles the click of the vertical flip button
    onVerticalFlipPress = () => {
       SoundManager.PlayButtonPress();
       rotation = 0
@@ -154,6 +261,7 @@ class GameScreen extends React.Component {
       this.props.flipVertical()
    }
 
+   // Handles the click of the horizontal flip button
    onHorizontalFlipPress = () => {
       SoundManager.PlayButtonPress();
       rotation = 0
@@ -172,19 +280,50 @@ class GameScreen extends React.Component {
       this.props.flipHorizontal()
    }
 
+   // gets the needed piece image
    getPieceImage = (id) => {
       return images[id]
    }
 
+   // updates the playerTurn to the next non-surrendered player
+   nextTurn = () => {
+      this.playerTurn = (this.playerTurn + 1) % 4
+      while (this.props.players[this.playerTurn].surrendered) {
+         this.playerTurn = (this.playerTurn + 1) % 4
+      }
+   }
+
+   // handles surrendering for the current player
+   updateSurrender = () => {
+      SoundManager.PlayButtonPress()
+      surrenderedCount = this.props.players.reduce((accumulator, player) => {
+         if (player.surrendered)
+            return accumulator + 1
+         else
+            return accumulator
+      }, 0)
+      this.numRemainingPlayers -= 1
+
+      if (surrenderedCount === 3)
+         this.props.navigation.navigate('End');
+      else {
+         this.props.updateSurrender(true, this.playerTurn)
+         this.nextTurn();
+         this.props.selectPlayer(this.props.players[this.playerTurn])
+         this.selectPiece(this.props.players[this.playerTurn].pieces[0])
+      }
+   }
+
+   // renders the game screen
    render() {
       const menu = (<>
-         <View style={{backgroundColor: 'white', flex: 1, borderWidth:1 }}>
-            <View style={{alignItems:'center'}}><Text>Menu</Text></View>
-            <TouchableOpacity style={[{marginTop: 20,borderTopWidth:2},styles.menuButtons]} onPress={this.restartGame}><Text>Restart</Text></TouchableOpacity>
+         <View style={{ backgroundColor: 'white', flex: 1, borderWidth: 1 }}>
+            <View style={{ alignItems: 'center' }}><Text>Menu</Text></View>
+            <TouchableOpacity style={[{ marginTop: 0, borderTopWidth: 2 }, styles.menuButtons]} onPress={this.restartGame}><Text>Restart</Text></TouchableOpacity>
             <TouchableOpacity style={styles.menuButtons} onPress={this.newGame}><Text>New Game</Text></TouchableOpacity>
-            <TouchableOpacity style={[{borderBottomWidth: 2},styles.menuButtons]} onPress={this.quitGame}><Text>Quit</Text></TouchableOpacity>
-            <View style={{flex:1}}></View>
-            <TouchableOpacity style={[{borderTopWidth:2},styles.menuButtons]} onPress={() => { }}><Text>Surrender</Text></TouchableOpacity>
+            <TouchableOpacity style={[{ borderBottomWidth: 2 }, styles.menuButtons]} onPress={this.quitGame}><Text>Quit</Text></TouchableOpacity>
+            <View style={{ flex: 1 }}></View>
+            <TouchableOpacity style={[{ borderTopWidth: 2 }, styles.menuButtons]} onPress={this.updateSurrender}><Text>Surrender</Text></TouchableOpacity>
          </View>
       </>)
 
@@ -199,6 +338,8 @@ class GameScreen extends React.Component {
                   <GameBoard
                      selectedPiece={this.props.selectedPiece}
                      placePiece={this.placePiece}
+                     reloadBoard={this.state.reloadBoard}
+                     refresh={this.refreshBoard}
                   >
                   </GameBoard>
                </View>
@@ -295,13 +436,13 @@ const styles = StyleSheet.create({
       flex: 1,
       flexDirection: 'row',
    },
-   menuButtons:{
-      alignItems: 'flex-start', 
-      justifyContent: 'center',  
-      height: 50, 
-      borderWidth:1, 
-      borderRightWidth:0,
-      borderLeftWidth:0,
+   menuButtons: {
+      alignItems: 'flex-start',
+      justifyContent: 'center',
+      height: 50,
+      borderWidth: 1,
+      borderRightWidth: 0,
+      borderLeftWidth: 0,
    }
 });
 
@@ -313,7 +454,8 @@ mapStateToProps = (state) => {
 mapDispatchToProps = (dispatch) => (
    bindActionCreators({
       selectPlayer, selectPiece, removePiece,
-      flipVertical, flipHorizontal, rotateCW, rotateCCW
+      flipVertical, flipHorizontal, rotateCW, rotateCCW,
+      updateSurrender, reloadPlayers, resetPlayers
    }, dispatch)
 )
 

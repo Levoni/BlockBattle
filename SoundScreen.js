@@ -1,3 +1,12 @@
+//-----------------------------------------------------------------------------
+// Names:             Alex Bisbach, Matthew Burgess, Levon Swenson
+// Course:            Mobile Applications
+// Assignment:        Final Project
+// File description:  SoundScreen.js represents the settings screen in which
+//                    volume levels can be adjusted for both the background
+//                    music and sound effects
+//-----------------------------------------------------------------------------
+
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import LabeledSlider from './LabeledSlider';
@@ -6,6 +15,23 @@ import {bindActionCreators} from 'redux';
 import {updateMasterVolume, updateBackgroundVolume, updateSFXVolume} from './Actions'
 import SoundManager from './SoundManager';
 
+//-----------------------------------------------------------------------------
+// state:
+//         - none
+// props:
+//         - updateMasterVolume     - The function to be called after the
+//                                    master volume slider finishes sliding
+//                                    (passed automatically from redux)
+//         - updateBackgroundVolume - The function to be called after the
+//                                    background volume slider finihes sliding
+//                                    (passed automatically from redux)
+//         - updateSFXVolume        - The function to be called after the
+//                                    sfx volume slider finishes sliding
+//                                    (passed automatically from redux)
+//         - volume                 - The current volume values for master
+//                                    volume, background volume, and sfx volume
+//                                    (passed automatically from redux)
+//-----------------------------------------------------------------------------
 class SoundScreen extends React.Component {
    static navigationOptions = ({navigation}) => {
       return {
@@ -17,33 +43,38 @@ class SoundScreen extends React.Component {
          headerRight: <View style={{flex: 1}}/>
       }
    }
-   
-   state = {
-      masterVolume: 50,
-      backgroundVolume: 50,
-      sfxVolume: 50
-   }
 
+   //--------------------------------------------------------------------------
+   // The function which should be called when the master volume slider
+   // finishes sliding.  Updates the master volume value in redux.
+   //--------------------------------------------------------------------------
    onMasterSlidingComplete = (value) => {
       this.props.updateMasterVolume(value);
-      // this.setState({masterVolume: value});
-      // alert(this.state.masterVolume);
    }
 
+   //--------------------------------------------------------------------------
+   // The function which should be called when the background volume slider
+   // finishes sliding.  Updates the background volume value in redux and
+   // sets the background volume value in SoundManager.
+   //--------------------------------------------------------------------------
    onBackgroundSlidingComplete = (value) => {
       this.props.updateBackgroundVolume(value);
-      // this.setState({backgroundVolume: value});
-      // alert(this.state.backgroundVolume);
       SoundManager.SetBackgroundVolume(value/100);
    }
    
+   //--------------------------------------------------------------------------
+   // The function which should be called when the sfx volume slider finishes
+   // sliding.  Updates the sfx volume value in redux and sets the sfx volume
+   // value in SoundManager.
+   //--------------------------------------------------------------------------
    onSFXSlidingComplete = (value) => {
       this.props.updateSFXVolume(value);
-      // this.setState({sfxVolume: value});
-      // alert(this.state.sfxVolume);
       SoundManager.SetSFXVolume(value/100);
    }
 
+   //--------------------------------------------------------------------------
+   // Renders the SoundScreen.
+   //--------------------------------------------------------------------------
    render() {
       return (
          <View style={styles.container}>

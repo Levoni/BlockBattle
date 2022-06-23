@@ -1,4 +1,8 @@
+//-------------------------------------------------------------------------
+// File is resposible for loding the 21 piece images into an array
+//-------------------------------------------------------------------------
 
+// Array of piece images
 const images = [
 	require('./assets/0.png'),
 	require('./assets/1.png'),

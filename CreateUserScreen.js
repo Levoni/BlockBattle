@@ -1,5 +1,9 @@
+//-------------------------------------------------------------------------
+// This screen is resposible for allowing you to create a new user
+//-------------------------------------------------------------------------
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Button } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LabeledTextInput from './LabeledTextInput';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -7,12 +11,17 @@ import { addUser } from './Actions';
 import ColorPicker from './ColorPicker';
 import SoundManager from './SoundManager';
 
+
 class CreateUserScreen extends React.Component {
+   // state stores: text for the name input field
+   //               selected color text for the color pickder
    state = {
       name: '',
       selectedColor: 'red'
    }
 
+   // Validates name to be used then adds the user to the redux store
+   // input: name (string)
    addUser = (name) => {
       SoundManager.PlayButtonPress();
       if (name !== '') {
@@ -25,7 +34,9 @@ class CreateUserScreen extends React.Component {
          if (nameTaken) {
             alert("Name is already taken!");
          } else {
-            this.props.addUser({ name: name, color: this.state.selectedColor });
+            var Users = [...this.props.users,{ name: name, color: this.state.selectedColor, stats: {wins: 0, games: 0, points: 0} }];
+            AsyncStorage.setItem("users",JSON.stringify(Users));
+            this.props.addUser({ name: name, color: this.state.selectedColor, stats: {wins: 0, games: 0, points: 0} });
             this.props.navigation.navigate('UserSettingsScreen');
          }
 
@@ -41,7 +52,8 @@ class CreateUserScreen extends React.Component {
    }
 
 
-
+   // Navigation options for these screen
+   // title is center, has button on header right to add the user to store
    static navigationOptions = ({ navigation }) => {
       return {
          title: 'Add User',
@@ -57,6 +69,8 @@ class CreateUserScreen extends React.Component {
       }
    }
 
+   // Handles the color change of the color picker
+   // input: new color from the color picker (color string)
    changeColor = (color) => {
       this.setState({selectedColor: color});
    }
@@ -66,7 +80,6 @@ class CreateUserScreen extends React.Component {
          <View style={styles.container}>
             <View style={{ flex: 1 }}>
                <LabeledTextInput label='Name: ' onChangeText={(name) => this.setState({ name: name })} />
-               {/* <Button title="test" onPress={() => alert(this.state.name)} /> */}
             </View>
             <View style={{flex: 1 }}>
                <ColorPicker colors={this.props.colors} selected={this.state.selectedColor} onColorChange={(selectedColor) => this.changeColor(selectedColor)}/>

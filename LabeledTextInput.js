@@ -1,3 +1,11 @@
+//-------------------------------------------------------------------------
+// This component is responsible for rendering a text and textinput
+// field.
+// Props: isPassword (bool) - sets the secureText entry in the text field
+//        onchangeText (function) - fuction called when the value of the 
+//                                  text field is changed
+//-------------------------------------------------------------------------
+
 import React from 'react';
 import { StyleSheet, Text, View, TextInput } from 'react-native';
 

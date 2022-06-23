@@ -1,6 +1,9 @@
+//-------------------------------------------------------------------------
+// Screen that allows a user to select/input information for player one
+//-------------------------------------------------------------------------
 import React from 'react';
-import { TextInput, Button, StyleSheet, FlatList, TouchableOpacity, View, Text, Picker, KeyboardAvoidingView } from 'react-native';
-import Constants from 'expo-constants';
+import { TextInput, StyleSheet, FlatList, TouchableOpacity, View, Text, KeyboardAvoidingView } from 'react-native';
+import Constants  from 'expo-constants';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { updatePlayer, updatePlayerName, updatePlayerColor } from './Actions';
@@ -8,10 +11,14 @@ import ItemPlayer from './ItemPlayer'
 import ColorPicker from './ColorPicker'
 import SoundManager from './SoundManager';
 
+// constants used in the class
 const LEFT_BRACKET = '<';
 const PLAYER_INDEX = 0;
 
 class ScreenP1 extends React.Component {
+   // state stores the colors and usernames that are still available, 
+   // warning message and its color, and weather the color and name inputs
+   // are valid.
    state = {
       availableColors: [],
       availableUserNames: [],
@@ -23,9 +30,12 @@ class ScreenP1 extends React.Component {
       nameValid: true
    }
 
+   // Creates available names and color arrays when screen is loaded
    componentDidMount() {
+      // creates array of already used colors
       const userColors = this.props.players.map((item) => { return item.color })
 
+      // filters out the color used by player one
       const usedColors = userColors.filter((item, index) => { return (item != "" && index !== PLAYER_INDEX) })
       this.setState({
          availableColors: this.props.colors.filter((item) => {
@@ -36,7 +46,10 @@ class ScreenP1 extends React.Component {
          })
       })
 
+      // creates array of already used names
       const playerNames = this.props.players.map((item) => { return item.name })
+
+      // filters out the name used by player one
       const usedNames = playerNames.filter((item, index) => { return (item != "" && index !== PLAYER_INDEX) })
       this.setState({
          availableUserNames: this.props.users.filter((item) => {
@@ -48,6 +61,9 @@ class ScreenP1 extends React.Component {
       })
    }
 
+   // Handles inputing text into name field
+   // if text is already a used name displays warning message to user
+   // input: text (string) - current string for name input field
    handleName = (text) => {
       this.props.updatePlayerName(text, PLAYER_INDEX)
       if (this.props.players.map((player) => { return player.name }).filter((item, index) => { return index !== PLAYER_INDEX }).includes(text))
@@ -56,6 +72,9 @@ class ScreenP1 extends React.Component {
          this.setState({ warningNameMessage: '', warningNTextColor: "black", nameValid: true })
    }
 
+   // Handles inputing new color into color field
+   // if color is already a used name displays warning message to user
+   // input: color (string) - current string for color from color picker
    handleColorChange = (color) => {
       this.props.updatePlayerColor(color, PLAYER_INDEX)
 
@@ -65,6 +84,8 @@ class ScreenP1 extends React.Component {
          this.setState({ warningColorMessage: '', warningCTextColor: "black", colorValid: true })
    }
 
+   // Checks to see if current name and color are valid then navigates
+   // to next player screen if it is
    NavFoward = () => {
       SoundManager.PlayButtonPress();
       if (this.state.colorValid && this.state.nameValid
@@ -73,11 +94,14 @@ class ScreenP1 extends React.Component {
          this.props.navigation.navigate('SetupP2')
    }
 
+   // Navigates back to main menu
    NavBackward = () => {
       SoundManager.PlayButtonPress();
       this.props.navigation.navigate('MainMenuNav')
    }
 
+   // sets player ones name and color the the selected users preferences
+   // input: item (object) - user whos info will be used
    UserSelect = (item) => {
       SoundManager.PlayButtonPress();
       this.props.updatePlayer(item.name, item.color, PLAYER_INDEX)

@@ -1,40 +1,46 @@
+//-------------------------------------------------------------------------
+// Screen that display information for the four players, and gives option
+// to continue to the game.
+//-------------------------------------------------------------------------
 import React from 'react';
-import { TextInput, Button, StyleSheet, FlatList, TouchableOpacity, View, Text, Picker, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Text} from 'react-native';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { updatePlayer, updatePlayerName, updatePlayerColor } from './Actions';
-import Constants from 'expo-constants';
+import Constants  from 'expo-constants';
 import SoundManager from './SoundManager';
 
 class ScreenConfirm extends React.Component {
+
+   // Navigates to screenP1
    NavP1 = () => {
       SoundManager.PlayButtonPress();
       this.props.navigation.navigate('SetupP1')
    }
+
+   // Navigates to screenP2
    NavP2 = () => {
       SoundManager.PlayButtonPress();
       this.props.navigation.navigate('SetupP2')
    }
+
+   // Navigates to screenP3
    NavP3 = () => {
       SoundManager.PlayButtonPress();
       this.props.navigation.navigate('SetupP3')
    }
+
+   // Navigates to screenP4
    NavP4 = () => {
       SoundManager.PlayButtonPress();
       this.props.navigation.navigate('SetupP4')
    }
+
+   // Navigates to the GameScreen
    NavGame = () => {
       SoundManager.PlayButtonPress();
       SoundManager.PlayBackgroundMusic();
       this.props.navigation.navigate('Game')
-   }
-
-   componentDidMount(){
-      // console.log(this.props.players[0].pieces[0])
-      // console.log(this.props.players[1].pieces[0])
-      // console.log(this.props.players[2].pieces[0])
-      // console.log(this.props.players[3].pieces[0])
-      // console.log(Object.keys(this.props.players[0]))
    }
 
    render() {

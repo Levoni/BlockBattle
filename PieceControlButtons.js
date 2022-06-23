@@ -1,7 +1,35 @@
+//-----------------------------------------------------------------------------
+// Names:             Alex Bisbach, Matthew Burgess, Levon Swenson
+// Course:            Mobile Applications
+// Assignment:        Final Project
+// File description:  PieceControlButtons.js represents the collection of four
+//                    buttons used to manipulate pieces before placing them on
+//                    the gameboard.  Included are rotate clockwise and
+//                    counterclockwise and flip vertical and horizontal.
+//-----------------------------------------------------------------------------
+
 import React from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 
+//-----------------------------------------------------------------------------
+// state:
+//         - none
+// props:
+//         - onCounterClockwisePress - The function which should be called when
+//                                     the user taps the counterclockwise
+//                                     rotation button
+//         - onClockwisePress        - The function which should be called when
+//                                     the user taps the clockwise rotation
+//                                     button
+//         - onVerticalFlipPress     - The function which should be called when
+//                                     the user taps the vertical flip button
+//         - onHorizontalFlipPress   - The function which should be called when
+//                                     the user taps the horizontal flip button
+//-----------------------------------------------------------------------------
 export default class PieceControlButtons extends React.Component {
+   //--------------------------------------------------------------------------
+   // Renders the PieceControlButtons.
+   //--------------------------------------------------------------------------
    render() {
       return (
          <View style={styles.container}>
@@ -42,7 +70,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
    },
    touchableOpacity: {
-      padding: 10
+      padding: 5
    },
    image: {
       maxWidth: '100%',

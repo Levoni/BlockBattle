@@ -1,3 +1,10 @@
+//-------------------------------------------------------------------------
+// This component is responsible for rendering a text and slider.
+// Props: maximumValue (number) - sets max value of slider
+//        sliderValue (number) - the current value of the slider
+//        onSlidingComplete (function) - fuction called when the value of
+//                                  the slider is finished changing
+//-------------------------------------------------------------------------
 import React from 'react';
 import { StyleSheet, Text, View, Slider } from 'react-native';
 

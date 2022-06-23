@@ -1,5 +1,10 @@
+//-------------------------------------------------------------------------
+// Component that can be clicked and displays a given name
+// Props: name (string) - name of player to display
+//        click (function) - Is called when component is clicked
+//-------------------------------------------------------------------------
 import React from 'react';
-import { Button, StyleSheet, TouchableOpacity, View, Text, StatusBar } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 
 export default class ItemPlayer extends React.Component {
    render() {
@@ -13,6 +18,7 @@ export default class ItemPlayer extends React.Component {
       );
    }
 }
+
 const styles = StyleSheet.create({
    item: {
       paddingVertical: 2,

@@ -1,34 +1,31 @@
-//-------------------------------------------------------------
-// Props: colors - array of colors (string format)
-//        selected - string to store current selected color
-//        onColorChange - callback function for when color is
-//                        is change. takes (color) paramater.
-//-------------------------------------------------------------
+//-------------------------------------------------------------------------
+// This component allows a user to pick a color from a list
+// of colors.
+// Props: colors (string) - array of colors
+//        selected (string) - string to store current selected color
+//        onColorChange (function) - callback function for when
+//                        color is changed. paramater: color
+//-------------------------------------------------------------------------
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import SoundManager from './SoundManager';
 
 
-
 export default class ColorPicker extends React.Component {
+   // state stores a variable for if the color tray is open and the character to display on the left side
    state = {
       opened: false,
       buttonChar: '>'
    }
 
-   componentDidMount(){
-
-   }
-
-   //returns a highlight for selected colors touchableOpacity
+   // Returns a highlight for selected colors touchableOpacity
    getColorHighlight = (curItemColor, curSelected) => {
       if (curItemColor === curSelected)
          return (<View style={{ flex: 1, margin: 5, backgroundColor: 'rgba(255,255,255,.5)' }}></View>)
    }
 
-   //returns a touchableOpacity for every color in the color array
+   // Returns a touchableOpacity for every color in the color array
    getColorElements = () => {
-      console.log(this.props.colors)
       return (this.props.colors.map((color, index) => {
          return (
             <TouchableOpacity onPress={() => { this.SelectColor(color) }} key={index} style={{ width: 50, margin: 5, backgroundColor: color }}>
@@ -39,13 +36,13 @@ export default class ColorPicker extends React.Component {
       )
    }
 
-   //called if a colors touchableOpacity is clicked, used to set that color as selected color
+   // Called if a colors touchableOpacity is clicked, used to set that color as selected color
    SelectColor = (newColor) => {
       SoundManager.PlayButtonPress();
       this.props.onColorChange(newColor);
    }
 
-   //toggles wheather the drawer is open or closed
+   // Toggles wheather the drawer is open or closed
    Toggle = () => {
       SoundManager.PlayButtonPress();
       if (this.state.opened)
@@ -54,7 +51,7 @@ export default class ColorPicker extends React.Component {
          this.setState({ opened: true, buttonChar: '<' })
    }
 
-   // renders the selection drawer or selected color based on wehater it is opened or not
+   // Renders the selection drawer or selected color based on wehater it is opened or not
    renderScrollView = () => {
       if (this.state.opened)
          return (

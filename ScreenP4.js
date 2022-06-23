@@ -1,16 +1,24 @@
+//-------------------------------------------------------------------------
+// Screen that allows a user to select/input information for player four
+//-------------------------------------------------------------------------
 import React from 'react';
-import { TextInput, Button, StyleSheet, FlatList, TouchableOpacity, View, Text, Picker, KeyboardAvoidingView } from 'react-native';
-import Constants from 'expo-constants';
+import { TextInput, StyleSheet, FlatList, TouchableOpacity, View, Text, KeyboardAvoidingView } from 'react-native';
+import Constants  from 'expo-constants';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { updatePlayer, updatePlayerName, updatePlayerColor } from './Actions';
 import ItemPlayer from './ItemPlayer'
 import ColorPicker from './ColorPicker'
+import SoundManager from './SoundManager';
 
+// constants used in the class
 const LEFT_BRACKET = '<';
 const PLAYER_INDEX = 3;
 
 class ScreenP4 extends React.Component {
+      // state stores the colors and usernames that are still available, 
+   // warning message and its color, and weather the color and name inputs
+   // are valid.
   state = {
     availableColors: [],
     availableUserNames: [],
@@ -23,10 +31,12 @@ class ScreenP4 extends React.Component {
   }
    
   
-
+   // Creates available names and color arrays when screen is loaded
   componentDidMount() {
+      // creates array of already used colors
     const userColors = this.props.players.map((item) => { return item.color })
 
+    // filters out the color used by player one
     const usedColors = userColors.filter((item, index) => { return (item != "" && index !== PLAYER_INDEX) })
     this.setState({
       availableColors: this.props.colors.filter((item) => {
@@ -37,7 +47,10 @@ class ScreenP4 extends React.Component {
       })
     })
 
+    // creates array of already used names
     const playerNames = this.props.players.map((item) => { return item.name })
+    
+    // filters out the name used by player one
     const usedNames = playerNames.filter((item, index) => { return (item != "" && index !== PLAYER_INDEX) })
     this.setState({
       availableUserNames: this.props.users.filter((item) => {
@@ -49,6 +62,9 @@ class ScreenP4 extends React.Component {
     })
   }
 
+     // Handles inputing text into name field
+   // if text is already a used name displays warning message to user
+   // input: text (string) - current string for name input field
   handleName = (text) => {
     this.props.updatePlayerName(text, PLAYER_INDEX)
 
@@ -58,6 +74,9 @@ class ScreenP4 extends React.Component {
       this.setState({ warningNameMessage: '', warningNTextColor: "black", nameValid: true })
   }
 
+     // Handles inputing new color into color field
+   // if color is already a used name displays warning message to user
+   // input: color (string) - current string for color from color picker
   handleColorChange = (color) => {
     this.props.updatePlayerColor(color, PLAYER_INDEX)
 
@@ -67,18 +86,26 @@ class ScreenP4 extends React.Component {
       this.setState({ warningColorMessage: '', warningCTextColor: "black", colorValid: true })
   }
 
+     // Checks to see if current name and color are valid then navigates
+   // to next the confirmation screen if it is
   NavFoward = () => {
+   SoundManager.PlayButtonPress();
     if (this.state.colorValid && this.state.nameValid
       && this.props.players[PLAYER_INDEX].name !== ""
       && this.props.players[PLAYER_INDEX].color !== "")
       this.props.navigation.navigate('Confirm')
   }
 
+  // Navigates back to player three screen
   NavBackward = () => {
+   SoundManager.PlayButtonPress();
     this.props.navigation.navigate('SetupP3')
   }
 
+     // sets player twos name and color the the selected users preferences
+   // input: item (object) - user whos info will be used
   UserSelect = (item) => {
+   SoundManager.PlayButtonPress()
     this.props.updatePlayer(item.name, item.color, PLAYER_INDEX)
 
     if (!this.state.availableColors.includes(item.color))

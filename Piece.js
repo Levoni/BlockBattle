@@ -1,3 +1,10 @@
+//-------------------------------------------------------------------------
+// This file is responible for quickly creating a piece with a id, color,
+// and list of tiles
+// input: id (number) - id for the tile
+//        tiles (array of arrays) - array of tile information
+//        color (string) - color for the piecces
+//-------------------------------------------------------------------------
 export default class Piece {
 
   constructor(id, tiles, color) {

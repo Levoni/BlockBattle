@@ -1,5 +1,10 @@
+//-------------------------------------------------------------------------
+// This file is responsible for quickly creating a array of the necessary
+// pieces
+//-------------------------------------------------------------------------
 import Piece from './Piece'
 
+// Creates an array of pieces
 export default createTiles = (color) => {
   return [
     new Piece(0, [[0, 0]], color),
@@ -22,6 +27,6 @@ export default createTiles = (color) => {
     new Piece(17, [[0, 0], [-1, 0], [0, 1], [1, 1], [-1, -1]], color),
     new Piece(18, [[0, 0], [0, -1], [0, 1], [1, 1], [-1, -1]], color),
     new Piece(19, [[0, 0], [1, 0], [0, 1], [0, -1], [-1, -1]], color),
-    new Piece(20, [[0, 0], [-1, 0], [0, 1], [1, 0], [0, -1]], color),
+    new Piece(20, [[0, 0], [-1, 0], [0, 1], [1, 0], [0, -1]], color)
   ]
 }

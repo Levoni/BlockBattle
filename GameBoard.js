@@ -1,3 +1,13 @@
+//-------------------------------------------------------------------------
+// This component is responsible for rendering the game board.
+// Props: refresh (function) - the function to call after the board has
+//                         refreshed by restarting the game
+//        reloadBoard (boolean) - if true, the board will reload into an
+//                         empty state
+//        selectedPiece (Piece) - The piece that could potentially be placed
+//        placePiece (function) - The function to be called when a piece is
+//                         successfully placed
+//-------------------------------------------------------------------------
 import React from 'react';
 import { StyleSheet, View, ListView, TouchableOpacity } from 'react-native';
 import BoardTile from './BoardTile';
@@ -9,14 +19,29 @@ import SoundManager from './SoundManager';
 const boardSize = 20
 
 class GameBoard extends React.Component {
+   // The state holds the board of tiles. 
+   // The first round boolean is used for special placement rules
+   //       in the first set of turns
+   // refreshBoard is a function that is called after resetting the board
    constructor(props) {
       super(props)
       this.firstRound = true
+      this.refreshBoard = props.refresh
       this.state = {
          board: this.createBoard(boardSize)
       }
    }
 
+   // If the component is sent a value of true for reloadBoard,
+   //       the board will reset itself
+   componentWillReceiveProps(newProps) {
+      if (newProps.reloadBoard === true) {
+         this.setState({ board: this.createBoard(boardSize) })
+         this.refreshBoard()
+      }
+   }
+
+   // Creates the game board of tiles and assigns appropriate styles
    createBoard = (size) => {
       cols = [] // board[col]
       for (col = 0; col < size; col++) {
@@ -55,6 +80,7 @@ class GameBoard extends React.Component {
       return cols
    }
 
+   // Checks if it is the first round for special placement rules
    isFirstRound = () => {
       return (this.state.board[0][0].color === BoardTile.emptyColor
          || this.state.board[boardSize - 1][0].color === BoardTile.emptyColor
@@ -62,6 +88,7 @@ class GameBoard extends React.Component {
          || this.state.board[boardSize - 1][boardSize - 1].color === BoardTile.emptyColor)
    }
 
+   // Used to place a piece on the temporary board during the first round and determine if it is a valid placement
    placeFirstRoundPiece = (newBoard, col, row) => {
       let placedInCorner = false
       let placedOnPiece = false
@@ -79,6 +106,8 @@ class GameBoard extends React.Component {
       return { valid: placedInCorner && !placedOnPiece, board: newBoard }
    }
 
+   // Used to place a piece on the temporary board during the rest of the game,
+   //    and determine if it is a valid placement
    placeNormalRoundPiece = (newBoard, col, row) => {
       let placedOnPiece = false
       let placedKittyCorner = false
@@ -99,6 +128,8 @@ class GameBoard extends React.Component {
       return { valid: placedKittyCorner && !placedOnPiece && !adjacentToOwnPiece, board: newBoard }
    }
 
+   // Used to determine the type of placement needed, and places pieces to the real board if the 
+   //    temporary board is valid
    placePiece = (col, row) => {
       SoundManager.PlayButtonPress();
       this.firstRound = this.isFirstRound()
@@ -119,6 +150,7 @@ class GameBoard extends React.Component {
       }
    }
 
+   // Checks the validity of a placement
    checkValidPlace(row, col) {
       if (col + 1 < boardSize && row + 1 < boardSize &&
          this.state.board[row + 1][col + 1].color === this.props.selectedPiece.color) {
@@ -139,6 +171,8 @@ class GameBoard extends React.Component {
       return false
    }
 
+   // Checks if a piece is directly adjacent to another piece of the same color, 
+   // which isn't allowed
    checkAdjacentToOwnPiece(row, col) {
       if (row + 1 < boardSize &&
          this.state.board[row + 1][col].color === this.props.selectedPiece.color) {
@@ -159,6 +193,7 @@ class GameBoard extends React.Component {
       return false
    }
 
+   // Checks if a placement is valid during the first round
    checkValidFirstPlace(row, col) {
       if ((row === 0 && col === 0) ||
          (row === boardSize - 1 && col === 0) ||
@@ -170,6 +205,7 @@ class GameBoard extends React.Component {
       return false
    }
 
+   // Renders the game board
    render() {
       return (
          <View style={styles.container}>
